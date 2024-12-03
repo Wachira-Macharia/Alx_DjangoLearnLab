@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from relationship_app.views import list_books, LibraryDetailView, admin_view, librarian_view, member_view, add_book, edit_book, delete_book  # Importing the views explicitly
+from relationship_app.views import list_books, LibraryDetailView, admin_view, librarian_view, member_view, add_book, edit_book, delete_book, login_view, logout_view, register_view  # Importing the views explicitly
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +28,8 @@ urlpatterns = [
     path('book/add/', add_book, name='add_book'),
     path('book/edit/<int:book_id>/', edit_book, name='edit_book'),
     path('book/delete/<int:book_id>/', delete_book, name='delete_book'),
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
+    path('register/', register_view, name='register'),
+    path('', login_view, name='home'),  # Home page defaults to login for this example
 ]

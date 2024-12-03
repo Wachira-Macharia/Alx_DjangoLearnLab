@@ -9,6 +9,41 @@ from .models import Book
 from .forms import BookForm  # Assume you have a BookForm for book operations
 
 # Create your views here.
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.decorators import login_required
+
+# Login view
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')  # Redirect to a homepage or dashboard
+    else:
+        form = AuthenticationForm()
+    return render(request, 'relationship_app/login.html', {'form': form})
+
+# Logout view
+@login_required
+def logout_view(request):
+    logout(request)
+    return render(request, 'relationship_app/logout.html')
+
+# Registration view
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')  # Redirect to a homepage or dashboard
+    else:
+        form = UserCreationForm()
+    return render(request, 'relationship_app/register.html', {'form': form})
+
 
 # Function-based view to list all books
 def list_books(request):
