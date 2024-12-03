@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import permission_required
 from .models import Book
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from .forms import BookForm  # Assume you have a BookForm for book operations
 
