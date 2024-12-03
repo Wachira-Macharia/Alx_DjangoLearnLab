@@ -27,9 +27,8 @@ urlpatterns = [
     path('add_book/', add_book, name='add_book'),
     path('edit_book/', edit_book, name='edit_book'),
     path('delete_book//', delete_book, name='delete_book'),
-    path('login/', login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
-    path('register/', register_view, name='register'),
-    path('', login_view, name='home'),  # Home page defaults to login for this example
+    path('register/', register_view.register_view, name='register'),
+    path('login/', login_view.as_view(template_name='relationship_app/login.html'), name='login'),
+    path('logout/', logout_view.as_view(template_name='relationship_app/logout.html'), name='logout'),
 ]
 
