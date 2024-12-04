@@ -17,10 +17,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path,include
-from blog.views import UserLoginView, UserLogoutView, register, profile
+from .views import UserLoginView, UserLogoutView, register, profile
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('blog/', include('blog.urls')),
+    path('login/', UserLoginView.as_view(), name='login'),
+    path('logout/', UserLogoutView.as_view(), name='logout'),
+    path('register/', register, name='register'),
+    path('profile/', profile, name='profile'),
 ]
 
