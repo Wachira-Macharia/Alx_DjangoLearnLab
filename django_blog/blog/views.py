@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from .models import Post, Comment
+from django.db.models import Q
 
 class UserLoginView(LoginView):
     template_name = 'blog/login.html'
@@ -119,3 +120,30 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('post-detail', kwargs={'pk': self.object.post.pk})
+
+# Search View: Use Q objects for complex filtering
+class PostSearchView(ListView):
+    model = Post
+    template_name = 'blog/post_search.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        if query:
+            return Post.objects.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(tags__name__icontains=query)
+            ).distinct()
+        return Post.objects.none()
+
+# Filter by Tag View
+class TaggedPostListView(ListView):
+    model = Post
+    template_name = 'blog/tagged_posts.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        tag_name = self.kwargs.get('tag_name')
+        return Post.objects.filter(tags__name__iexact=tag_name).distinct()
+

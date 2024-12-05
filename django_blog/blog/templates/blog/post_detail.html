@@ -32,3 +32,17 @@
     <p>No comments yet. Be the first to comment!</p>
 {% endfor %}
 
+<!-- Display tags -->
+<h2>Tags:</h2>
+<ul>
+    {% for tag in post.tags.all %}
+        <li><a href="{% url 'posts-by-tag' tag.name %}">{{ tag.name }}</a></li>
+    {% endfor %}
+</ul>
+
+<!-- Add a search bar to the navigation -->
+<form method="get" action="{% url 'post-search' %}">
+    <input type="text" name="q" placeholder="Search posts..." />
+    <button type="submit">Search</button>
+</form>
+
