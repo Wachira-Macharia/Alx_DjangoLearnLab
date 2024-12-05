@@ -147,3 +147,29 @@ class TaggedPostListView(ListView):
         tag_name = self.kwargs.get('tag_name')
         return Post.objects.filter(tags__name__iexact=tag_name).distinct()
 
+from django.views.generic import ListView
+from .models import Post
+from taggit.models import Tag
+
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'  # Reuse the existing template
+    context_object_name = 'posts'
+    
+    def get_queryset(self):
+        tag_slug = self.kwargs.get('tag_slug')
+        self.tag = None
+        queryset = Post.objects.all()
+        if tag_slug:
+            try:
+                self.tag = Tag.objects.get(slug=tag_slug)
+                queryset = queryset.filter(tags__in=[self.tag])
+            except Tag.DoesNotExist:
+                queryset = Post.objects.none()
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tag'] = self.tag
+        return context
+
