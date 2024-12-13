@@ -1,6 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission
 from django.utils.translation import gettext_lazy as _
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponseForbidden
+from django.contrib.contenttypes.models import ContentType
+
 
 class Book(models.Model):
     title = models.CharField(max_length=200)
@@ -10,7 +15,6 @@ class Book(models.Model):
     def __str__(self):
         return f"{self.title} by {self.author} ({self.publication_year})"
 
-# Step 3: Custom User Manager
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -47,3 +51,29 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+# Step 1: Define Custom Permissions
+class Article(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        permissions = [
+            ("can_view", "Can view articles"),
+            ("can_create", "Can create articles"),
+            ("can_edit", "Can edit articles"),
+            ("can_delete", "Can delete articles"),
+        ]
+
+@permission_required('your_app_name.can_edit', raise_exception=True)
+def edit_article(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+    # Logic for editing the article
+    return HttpResponse(f"Editing article: {article.title}")
+
+@permission_required('your_app_name.can_view', raise_exception=True)
+def view_article(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+    return HttpResponse(f"Viewing article: {article.title}")

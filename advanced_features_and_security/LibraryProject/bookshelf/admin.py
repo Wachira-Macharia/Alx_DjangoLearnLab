@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import Book ,CustomUser
+from .models import Book ,CustomUser, Article
 
 # Custom admin configuration for the Book model
 class BookAdmin(admin.ModelAdmin):
@@ -29,3 +29,6 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
 
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(Article)
+
+
