@@ -2,22 +2,23 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Author, Book
-from django.contrib.auth.models import User
-from django.urls import reverse
 
 class BookAPITestCase(TestCase):
     def setUp(self):
-        # Create a test user
-        self.user = User.objects.create_user(username="testuser", password="testpass")
+        """
+        Set up the test database and API client for testing.
+        """
+        # Create API client
         self.client = APIClient()
+        self.client.login(user=self.user)
 
-        # Authenticate the test client
-        self.client.force_authenticate(user=self.user)
-
-        # Create test data (authors, books, etc.)
-        self.author = Author.objects.create(name="Author Name")
-        self.book = Book.objects.create(
-            title="Sample Book", publication_year=2020, author=self.author
+        # Create Author and Books
+        self.author = Author.objects.create(name="John Doe")
+        self.book1 = Book.objects.create(
+            title="Book One", publication_year=2020, author=self.author
+        )
+        self.book2 = Book.objects.create(
+            title="Book Two", publication_year=2021, author=self.author
         )
 
         # Endpoints
@@ -41,17 +42,17 @@ class BookAPITestCase(TestCase):
         self.assertEqual(response.data['title'], self.book1.title)
 
     def test_create_book(self):
-        # Prepare the payload
-        payload = {
-            "title": "New Book",
-            "publication_year": 2023,
+        """
+        Test creating a new book.
+        """
+        data = {
+            "title": "Book Three",
+            "publication_year": 2022,
             "author": self.author.id,
         }
-        response = self.client.post(reverse('book-list'), data=payload)
-
-        # Assert the response
+        response = self.client.post(self.book_list_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Book.objects.count(), 2)
+        self.assertEqual(Book.objects.count(), 3)
 
     def test_update_book(self):
         """
@@ -64,9 +65,12 @@ class BookAPITestCase(TestCase):
         self.assertEqual(self.book1.title, "Updated Book One")
 
     def test_delete_book(self):
-        response = self.client.delete(reverse('book-detail', args=[self.book.id]))
+        """
+        Test deleting a book.
+        """
+        response = self.client.delete(self.book_detail_url(self.book1.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Book.objects.count(), 0)
+        self.assertEqual(Book.objects.count(), 1)
 
     def test_filter_books_by_author(self):
         """
@@ -94,14 +98,14 @@ class BookAPITestCase(TestCase):
         self.assertEqual(response.data[0]['publication_year'], 2020)
 
     def test_create_book_requires_authentication(self):
-        # Unauthenticated client
-        unauthenticated_client = APIClient()
-        payload = {
-            "title": "Unauthorized Book",
+        """
+        Test that creating a book is restricted to authenticated users.
+        """
+        self.client.force_authenticate(user=None)  # Unauthenticated
+        data = {
+            "title": "Book Four",
             "publication_year": 2023,
             "author": self.author.id,
         }
-        response = unauthenticated_client.post(reverse('book-list'), data=payload)
-
-        # Assert the response
+        response = self.client.post(self.book_list_url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
